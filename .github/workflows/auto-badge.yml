@@ -2,28 +2,35 @@ name: Auto Add Badge
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Otomatis jalan setiap jam 12 malam untuk cek repo baru
+  workflow_dispatch: # Biar bisa lu klik tombol "Run workflow" manual kapan aja
 
 jobs:
   inject-badge:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
-      - name: Run Injection Script
+      - name: Install Node Fetch
+        run: npm install node-fetch@2
+
+      - name: Execute Injection Script
         env:
           TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
-          GITHUB_USERNAME: "riyankhamdani"
-          KOFI_USERNAME: "muchamatriyankhamdani"
         run: |
-          # Di sini lu bisa naruh script nodejs sederhana 
-          # atau pakai curl/bash untuk update file README.
-          echo "Robot sedang bekerja menyisipkan badge..."
+          node -e "
+          const fs = require('fs');
+          // Baca script.js asli milik lu, lalu ganti variabel TOKEN-nya dengan Token dari Secrets
+          let code = fs.readFileSync('script.js', 'utf8');
+          code = code.replace(/const TOKEN = \".*?\"/, 'const TOKEN = \"' + process.env.TOKEN + '\"');
+          
+          // Jalankan kodenya langsung di server GitHub Actions
+          eval(code);
+          "
