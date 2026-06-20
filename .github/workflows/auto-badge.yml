@@ -1,0 +1,29 @@
+name: Auto Add Badge
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  inject-badge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Run Injection Script
+        env:
+          TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+          GITHUB_USERNAME: "riyankhamdani"
+          KOFI_USERNAME: "muchamatriyankhamdani"
+        run: |
+          # Di sini lu bisa naruh script nodejs sederhana 
+          # atau pakai curl/bash untuk update file README.
+          echo "Robot sedang bekerja menyisipkan badge..."
